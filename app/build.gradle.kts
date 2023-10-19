@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.bima.mylocationtracker"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.bima.mylocationtracker"
