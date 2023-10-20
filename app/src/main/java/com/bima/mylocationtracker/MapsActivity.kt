@@ -29,6 +29,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private lateinit var locationRequest: LocationRequest
+    private lateinit var locationCallback: LocationCallback
 
     private var isTracking = false
 
@@ -51,6 +52,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 //        getMyLastLocation()
         createLocationRequest()
+        createLocationCallback()
 
         binding.btnStart.setOnClickListener {
             if (!isTracking) {
@@ -174,6 +176,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.btnStart.text = getString(R.string.stop_running)
         } else {
             binding.btnStart.text = getString(R.string.start_running)
+        }
+    }
+
+    private fun createLocationCallback() {
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                for (location in locationResult.locations) {
+                    Log.d(TAG, "onLocationResult: " + location.latitude + ", " + location.longitude)
+                }
+            }
         }
     }
 
