@@ -30,6 +30,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var locationRequest: LocationRequest
 
+    private var isTracking = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -49,6 +51,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
 //        getMyLastLocation()
         createLocationRequest()
+
+        binding.btnStart.setOnClickListener {
+            if (!isTracking) {
+                updateTrackingStatus(true)
+            } else {
+                updateTrackingStatus(false)
+            }
+        }
     }
 
     private val requestPermissionLauncher =
@@ -121,6 +131,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             when (result.resultCode) {
                 RESULT_OK ->
                     Log.i(TAG, "onActivityResult: All location settings are satisfied.")
+
                 RESULT_CANCELED ->
                     Toast.makeText(
                         this@MapsActivity,
@@ -156,6 +167,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
     }
+
+    private fun updateTrackingStatus(newStatus: Boolean) {
+        isTracking = newStatus
+        if (isTracking) {
+            binding.btnStart.text = getString(R.string.stop_running)
+        } else {
+            binding.btnStart.text = getString(R.string.start_running)
+        }
+    }
+
     companion object {
         private const val TAG = "MapsActivity"
     }
