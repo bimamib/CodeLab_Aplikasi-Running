@@ -21,6 +21,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import java.util.concurrent.TimeUnit
@@ -36,6 +37,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var isTracking = false
     private var allLatLng = ArrayList<LatLng>()
+    private var boundsBuilder = LatLngBounds.Builder()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -200,6 +202,11 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             .width(10f)
                             .addAll(allLatLng)
                     )
+
+                    //set boundaries
+                    boundsBuilder.include(lastLatLng)
+                    val bounds: LatLngBounds = boundsBuilder.build()
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 64))
                 }
             }
         }
