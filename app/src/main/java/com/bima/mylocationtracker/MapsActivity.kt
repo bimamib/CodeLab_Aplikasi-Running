@@ -16,6 +16,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.bima.mylocationtracker.databinding.ActivityMapsBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import android.Manifest
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -80,20 +81,6 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             this,
             permission
         ) == PackageManager.PERMISSION_GRANTED
-    }
-    private fun getMyLastLocation() {
-        if     (checkPermission(Manifest.permission.ACCESS_FINE_LOCATION) &&
-            checkPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-        ){
-
-        } else {
-            requestPermissionLauncher.launch(
-                arrayOf(
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                )
-            )
-        }
     }
 
     private fun getMyLastLocation() {
