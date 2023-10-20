@@ -17,12 +17,21 @@ import com.bima.mylocationtracker.databinding.ActivityMapsBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import android.Manifest
+import android.content.IntentSender
+import android.icu.util.TimeUnit
+import android.location.LocationRequest
+import android.util.Log
+import androidx.activity.result.IntentSenderRequest
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.LocationSettingsRequest
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private lateinit var locationRequest: LocationRequest
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,8 +64,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 //        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
 //        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
 
-        getMyLastLocation()
-
+//        getMyLastLocation()
+        createLocationRequest()
     }
 
     private val requestPermissionLauncher =
@@ -120,5 +129,49 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .title(getString(R.string.start_point))
         )
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startLocation, 17f))
+    }
+
+    private val resolutionLauncher =
+        registerForActivityResult(
+            ActivityResultContracts.StartIntentSenderForResult()
+        ) { result ->
+            when (result.resultCode) {
+                RESULT_OK ->
+                    Log.i(TAG, "onActivityResult: All location settings are satisfied.")
+                RESULT_CANCELED ->
+                    Toast.makeText(
+                        this@MapsActivity,
+                        "Anda harus mengaktifkan GPS untuk menggunakan aplikasi ini!",
+                        Toast.LENGTH_SHORT
+                    ).show()
+            }
+        }
+    private fun createLocationRequest() {
+        locationRequest = LocationRequest.create().apply {
+            interval = TimeUnit.SECONDS.toMillis(1)
+            maxWaitTime = TimeUnit.SECONDS.toMillis(1)
+            priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+        }
+        val builder = LocationSettingsRequest.Builder()
+            .addLocationRequest(locationRequest)
+        val client = LocationServices.getSettingsClient(this)
+        client.checkLocationSettings(builder.build())
+            .addOnSuccessListener {
+                getMyLastLocation()
+            }
+            .addOnFailureListener { exception ->
+                if (exception is ResolvableApiException) {
+                    try {
+                        resolutionLauncher.launch(
+                            IntentSenderRequest.Builder(exception.resolution).build()
+                        )
+                    } catch (sendEx: IntentSender.SendIntentException) {
+                        Toast.makeText(this@MapsActivity, sendEx.message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+    }
+    companion object {
+        private const val TAG = "MapsActivity"
     }
 }
