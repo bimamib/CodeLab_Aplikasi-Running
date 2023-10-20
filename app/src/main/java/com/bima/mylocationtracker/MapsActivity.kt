@@ -5,6 +5,7 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Bundle
+import android.os.Looper
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.IntentSenderRequest
@@ -57,8 +58,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.btnStart.setOnClickListener {
             if (!isTracking) {
                 updateTrackingStatus(true)
+                startLocationUpdates()
             } else {
                 updateTrackingStatus(false)
+                stopLocationUpdates()
             }
         }
     }
@@ -187,6 +190,31 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    private fun startLocationUpdates() {
+        try {
+            fusedLocationClient.requestLocationUpdates(
+                locationRequest,
+                locationCallback,
+                Looper.getMainLooper()
+            )
+        } catch (exception: SecurityException) {
+            Log.e(TAG, "Error : " + exception.message)
+        }
+    }
+    private fun stopLocationUpdates() {
+        fusedLocationClient.removeLocationUpdates(locationCallback)
+    }
+    override fun onResume() {
+        super.onResume()
+        if (isTracking) {
+            startLocationUpdates()
+        }
+    }
+    override fun onPause() {
+        super.onPause()
+        stopLocationUpdates()
     }
 
     companion object {
